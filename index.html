@@ -102,10 +102,10 @@ function renderPackages(){
  $('count').textContent=packages.length+'件';
  $('packageList').innerHTML=packages.length?packages.map((p,i)=>`
  <div class="pkg"><div class="pkghead"><span>梱包番号 ${p.no}</span><button onclick="removePkg(${i})">🗑</button></div>
- <div class="pkgbody"><label>品名</label><input value="${esc(p.name||$('name').value)}" oninput="packages[${i}].name=this.value">
+ <div class="pkgbody"><label>品名</label><input value="${esc(p.name)}" oninput="packages[${i}].name=this.value">
  <label>品番</label><input value="${esc(p.sku)}" oninput="packages[${i}].sku=this.value">
  <div class="row"><div><label>数量</label><input type="number" value="${p.qty}" oninput="packages[${i}].qty=+this.value;renderSummary()"></div>
- <div><label>梱包形態</label><select onchange="packages[${i}].type=this.value"><option ${p.type==='カートン'?'selected':''}>カートン</option><option ${p.type==='パレット'?'selected':''}>パレット</option><option ${p.type==='木箱'?'selected':''}>木箱</option></select></div></div>
+ <div><label>梱包形態</label><select onchange="packages[${i}].type=this.value"><option ${p.type==='カートン'?'selected':''}>カートン</option><option ${p.type==='パレット'?'selected':''}>パレット</option><option ${p.type==='木箱'?'selected':''}>木箱</option><option ${p.type==='梱包無し'?'selected':''}>梱包無し</option></select></div></div>
  <div class="row"><div><label>正味重量 (kg)</label><input type="number" step=".01" value="${p.net}" oninput="packages[${i}].net=+this.value;renderSummary()"></div>
  <div><label>総重量 (kg)</label><input type="number" step=".01" value="${p.gross}" oninput="packages[${i}].gross=+this.value;renderSummary()"></div></div>
  <label>備考</label><textarea oninput="packages[${i}].note=this.value">${esc(p.note)}</textarea>
