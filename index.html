@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>貿易向けパッキングリスト</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e8edf5;color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
+.app{max-width:430px;min-height:100vh;margin:auto;background:#f5f7fb}.top{background:#0757c9;color:#fff;padding:15px 16px;position:sticky;top:0;z-index:5}.top b{font-size:19px}.top small{display:block;opacity:.9;margin-top:3px}
+main{padding:14px 14px 86px}.screen{display:none}.screen.active{display:block}.card{background:#fff;border:1px solid #dce3ee;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 7px #0000000a}
+h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:0 0 8px}label{display:block;font-size:12px;font-weight:700;color:#5c6879;margin:10px 0 5px}
+input,select,textarea{width:100%;font-size:15px;padding:11px;border:1px solid #cbd5e1;border-radius:9px;background:#fff}textarea{min-height:70px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{width:100%;border:0;border-radius:10px;padding:12px;font-weight:800;font-size:14px}.primary{background:#0757c9;color:#fff}.secondary{background:#fff;border:1px solid #cbd5e1;color:#26344a}
+.drop{margin-top:6px;border:1px dashed #6ea1e9;border-radius:10px;padding:12px;text-align:center;background:#f7fbff;color:#0757c9;font-weight:700}.photos{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.photo{width:74px;height:74px;object-fit:cover;border-radius:9px;border:1px solid #ccd5e2;cursor:pointer}
+.pkg{border:1px solid #d7e0eb;border-radius:12px;overflow:hidden;margin-bottom:10px;background:#fff}.pkghead{padding:10px 11px;background:#eef5ff;color:#0757c9;font-weight:800;display:flex;justify-content:space-between}.pkgbody{padding:11px}
+.badge{display:inline-block;background:#eaf2ff;color:#0757c9;padding:5px 8px;border-radius:99px;font-size:11px}.actions{display:flex;gap:8px;margin-bottom:12px}.actions .btn{flex:1}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid #dce3ee;z-index:10}.nav button{border:0;background:#fff;padding:9px 2px 10px;color:#6d7889;font-weight:700;font-size:10px}.nav button.on{color:#0757c9}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#f7f9fc;padding:11px;border-radius:10px;font-size:12px}.stat b{display:block;color:#0757c9;font-size:19px;margin-top:3px}
+.modal{display:none;position:fixed;inset:0;background:#000c;z-index:20;align-items:center;justify-content:center;padding:20px}.modal.on{display:flex}.modal img{max-width:100%;max-height:82vh;border-radius:10px}.close{position:absolute;right:15px;top:15px;width:40px;height:40px;border:0;border-radius:50%;background:#0009;color:#fff;font-size:24px}
+.empty{text-align:center;color:#778397;padding:18px}.muted{color:#697588;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><b>貿易向け パッキングリスト</b><small>スマホ入力・写真管理・自動集計・PDF出力</small></div>
+<main>
+<section id="basic" class="screen active">
+<div class="card"><h2>基本情報</h2>
+<label>品名</label><input id="name" placeholder="例：プラスチック部品">
+<label>パッキングリスト番号</label><input id="pl" placeholder="例：PL-2026-0001">
+<label>日付</label><input id="date" type="date">
+<label>基本写真</label><input id="baseFile" type="file" accept="image/*" multiple hidden>
+<div class="drop" id="baseAdd">📷 写真を追加</div><div id="basePhotos" class="photos"></div>
+</div>
+<button class="btn primary" id="nextBtn">保存して梱包情報へ →</button>
+</section>
+
+<section id="packages" class="screen">
+<div class="actions"><button class="btn secondary" id="backBtn">← 基本情報</button><span class="badge" id="count">0件</span></div>
+<div id="packageList"></div>
+<button class="btn primary" id="addBtn">＋ 梱包を追加</button>
+</section>
+
+<section id="history" class="screen">
+<div class="card"><h2>保存済みPacking List</h2>
+<label>検索（PL番号・品名）</label><input id="historySearch" placeholder="例：PL-2026 / 部品">
+</div>
+<div id="historyList"></div>
+</section>
+
+<section id="summary" class="screen">
+<div class="card"><h2>集計</h2><div class="stats">
+<div class="stat">総梱包数<b id="sPkg">0 件</b></div><div class="stat">総数量<b id="sQty">0 pcs</b></div>
+<div class="stat">総正味重量<b id="sNet">0.00 kg</b></div><div class="stat">総重量<b id="sGross">0.00 kg</b></div>
+</div></div>
+<div class="actions"><button class="btn primary" id="pdfBtn">📄 PDF出力</button><button class="btn secondary" id="saveBtn">💾 下書き保存</button></div>
+<div class="card"><h2>写真一覧</h2><div id="allPhotos" class="photos"></div></div>
+<div class="card"><h2>梱包確認</h2><div id="summaryList"></div></div>
+</section>
+</main>
+<div class="nav">
+<button id="n1" class="on">⌂<br>基本情報</button>
+<button id="n2">▣<br>梱包情報</button>
+<button id="n3">▤<br>集計・出力</button>
+<button id="n4">↻<br>履歴</button>
+</div>
+</div>
+<div class="modal" id="viewer"><button class="close" id="close">×</button><img id="viewerImg"></div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+let packages=[], basePhotos=[];
+$('date').value=new Date().toISOString().slice(0,10);
+
+function getHistory(){try{return JSON.parse(localStorage.getItem('packingHistory')||'[]')}catch(e){return[]}}
+function setHistory(a){localStorage.setItem('packingHistory',JSON.stringify(a))}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  [['basic','n1'],['packages','n2'],['summary','n3'],['history','n4']].forEach(([s,n])=>$(n).classList.toggle('on',s===id));
+  if(id==='packages') renderPackages();
+  if(id==='summary') renderSummary();
+  if(id==='history') renderHistory();
+}
+$('nextBtn').addEventListener('click',()=>show('packages'));
+$('backBtn').addEventListener('click',()=>show('basic'));
+$('n1').addEventListener('click',()=>show('basic'));
+$('n2').addEventListener('click',()=>show('packages'));
+$('n3').addEventListener('click',()=>show('summary'));
+$('n4').addEventListener('click',()=>show('history'));
+$('historySearch').addEventListener('input',renderHistory);
+$('addBtn').addEventListener('click',()=>{packages.push({no:String(packages.length+1).padStart(3,'0'),sku:'',qty:0,type:'カートン',net:0,gross:0,note:'',photos:[]});renderPackages();});
+$('baseAdd').addEventListener('click',()=> $('baseFile').click());
+$('baseFile').addEventListener('change',e=>filesToImages(e.target.files,arr=>{basePhotos.push(...arr);renderBasePhotos()}));
+
+function filesToImages(files,cb){let out=[],n=files.length;if(!n)return;[...files].forEach(f=>{let r=new FileReader();r.onload=()=>{out.push(r.result);if(--n===0)cb(out)};r.readAsDataURL(f)})}
+function renderBasePhotos(){$('basePhotos').innerHTML=basePhotos.map(x=>photoHTML(x)).join('')}
+function photoHTML(src){return `<img class="photo" src="${src}" data-src="${src}">`}
+function bindPhotos(root=document){root.querySelectorAll('.photo').forEach(im=>im.onclick=()=>openViewer(im.dataset.src||im.src))}
+function renderPackages(){
+ $('count').textContent=packages.length+'件';
+ $('packageList').innerHTML=packages.length?packages.map((p,i)=>`
+ <div class="pkg"><div class="pkghead"><span>梱包番号 ${p.no}</span><button onclick="removePkg(${i})">🗑</button></div>
+ <div class="pkgbody"><label>品名</label><input value="${esc(p.name||$('name').value)}" oninput="packages[${i}].name=this.value">
+ <label>品番</label><input value="${esc(p.sku)}" oninput="packages[${i}].sku=this.value">
+ <div class="row"><div><label>数量</label><input type="number" value="${p.qty}" oninput="packages[${i}].qty=+this.value;renderSummary()"></div>
+ <div><label>梱包形態</label><select onchange="packages[${i}].type=this.value"><option ${p.type==='カートン'?'selected':''}>カートン</option><option ${p.type==='パレット'?'selected':''}>パレット</option><option ${p.type==='木箱'?'selected':''}>木箱</option></select></div></div>
+ <div class="row"><div><label>正味重量 (kg)</label><input type="number" step=".01" value="${p.net}" oninput="packages[${i}].net=+this.value;renderSummary()"></div>
+ <div><label>総重量 (kg)</label><input type="number" step=".01" value="${p.gross}" oninput="packages[${i}].gross=+this.value;renderSummary()"></div></div>
+ <label>備考</label><textarea oninput="packages[${i}].note=this.value">${esc(p.note)}</textarea>
+ <label>梱包写真</label><input id="pf${i}" type="file" accept="image/*" multiple hidden>
+ <div class="drop" onclick="$('pf${i}').click()">📷 この梱包の写真を追加</div><div class="photos">${p.photos.map(x=>photoHTML(x)).join('')}</div>
+ </div></div>`).join(''):'<div class="card empty">「＋ 梱包を追加」から梱包を登録してください。</div>';
+ packages.forEach((p,i)=>{let el=$('pf'+i);if(el)el.onchange=e=>filesToImages(e.target.files,a=>{p.photos.push(...a);renderPackages();})});
+ bindPhotos();
+}
+function removePkg(i){packages.splice(i,1);packages.forEach((p,j)=>p.no=String(j+1).padStart(3,'0'));renderPackages();renderSummary()}
+function renderSummary(){
+ let q=0,n=0,g=0;packages.forEach(p=>{q+=+p.qty||0;n+=+p.net||0;g+=+p.gross||0});
+ $('sPkg').textContent=packages.length+' 件';$('sQty').textContent=q+' pcs';$('sNet').textContent=n.toFixed(2)+' kg';$('sGross').textContent=g.toFixed(2)+' kg';
+ $('summaryList').innerHTML=packages.length?packages.map(p=>`<div style="padding:9px 0;border-bottom:1px solid #e4e8ef"><b>梱包番号 ${p.no}</b><br>${esc(p.name||$('name').value)} / ${esc(p.sku)}<br>${p.qty} pcs / Net ${(+p.net||0).toFixed(2)} kg / Gross ${(+p.gross||0).toFixed(2)} kg / 写真 ${p.photos.length}枚</div>`).join(''):'<div class="empty">梱包データがありません。</div>';
+ $('allPhotos').innerHTML=[...basePhotos,...packages.flatMap(p=>p.photos)].map(x=>photoHTML(x)).join('')||'<span class="muted">写真はありません</span>';bindPhotos();
+}
+$('saveBtn').addEventListener('click',()=>{
+ const data={name:$('name').value,pl:$('pl').value,date:$('date').value,basePhotos,packages};
+ localStorage.setItem('packingListDraft',JSON.stringify(data));
+ let h=getHistory().filter(x=>x.pl!==data.pl);
+ h.unshift({...data,savedAt:new Date().toISOString()}); setHistory(h.slice(0,50));
+ alert('下書きを保存し、履歴に登録しました。');
+});
+function renderHistory(){
+ const q=($('historySearch').value||'').toLowerCase();
+ const h=getHistory().filter(x=>(x.pl||'').toLowerCase().includes(q)||(x.name||'').toLowerCase().includes(q));
+ $('historyList').innerHTML=h.length?h.map((x,i)=>`<div class="card"><h3>${esc(x.name||'（品名なし）')}</h3><div class="muted">PL No. ${esc(x.pl||'—')}　${esc(x.date||'')}</div><div class="muted" style="margin-top:6px">${(x.packages||[]).length}件の梱包</div><div class="actions" style="margin-top:9px"><button class="btn secondary" onclick="loadHistory(${i}, '${esc(q)}')">呼び出す</button><button class="btn secondary" onclick="deleteHistory(${i}, '${esc(q)}')">削除</button></div></div>`).join(''):'<div class="card empty">保存済みデータはありません。</div>';
+}
+function filteredHistory(){const q=($('historySearch').value||'').toLowerCase();return getHistory().filter(x=>(x.pl||'').toLowerCase().includes(q)||(x.name||'').toLowerCase().includes(q))}
+function loadHistory(i){const x=filteredHistory()[i];if(!x)return;$('name').value=x.name||'';$('pl').value=x.pl||'';$('date').value=x.date||'';basePhotos=x.basePhotos||[];packages=x.packages||[];renderBasePhotos();renderPackages();show('basic');}
+function deleteHistory(i){const x=filteredHistory()[i];if(!x)return;if(confirm('この履歴を削除しますか？')){let h=getHistory();h=h.filter(y=>!(y.pl===x.pl&&y.savedAt===x.savedAt));setHistory(h);renderHistory();}}
+$('pdfBtn').addEventListener('click',()=>{
+ const rows=packages.map(p=>`<tr><td>${p.no}</td><td>${esc(p.name||$('name').value)}<br>${esc(p.sku)}</td><td>${p.qty}</td><td>${esc(p.type)}</td><td>${(+p.net||0).toFixed(2)}</td><td>${(+p.gross||0).toFixed(2)}</td><td>${esc(p.note)}</td></tr>`).join('');
+ const imgs=[...basePhotos,...packages.flatMap(p=>p.photos)].map(x=>`<img src="${x}">`).join('');
+ const w=window.open('','_blank');if(!w){alert('ポップアップを許可してください。');return}
+ w.document.write(`<html><head><title>Packing List</title><style>body{font-family:Arial,sans-serif;margin:28px}h1{text-align:center}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #777;padding:6px}th{background:#eee}.meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:15px}.photos{display:flex;flex-wrap:wrap;gap:8px}.photos img{width:110px;height:90px;object-fit:cover;border:1px solid #999}</style></head><body><h1>PACKING LIST</h1><div class="meta"><div>品名：${esc($('name').value)}</div><div>PL No.：${esc($('pl').value)}</div><div>日付：${esc($('date').value)}</div></div><table><tr><th>梱包番号</th><th>品名・品番</th><th>数量</th><th>梱包形態</th><th>Net kg</th><th>Gross kg</th><th>備考</th></tr>${rows}</table><h3>添付写真</h3><div class="photos">${imgs}</div><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close();
+});
+function openViewer(src){$('viewerImg').src=src;$('viewer').classList.add('on')}
+$('close').addEventListener('click',()=> $('viewer').classList.remove('on'));
+$('viewer').addEventListener('click',e=>{if(e.target===$('viewer'))$('viewer').classList.remove('on')});
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+renderPackages();
+</script>
+</body></html>
