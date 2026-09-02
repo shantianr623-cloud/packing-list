@@ -126,12 +126,18 @@ function renderPackages(){
  <div><label>総重量 (kg)</label><input type="number" step=".01" value="${p.gross}" oninput="packages[${i}].gross=+this.value;renderSummary()"></div></div>
  <label>備考</label><textarea oninput="packages[${i}].note=this.value">${esc(p.note)}</textarea>
  <label>梱包写真</label><input id="pf${i}" type="file" accept="image/*" multiple hidden>
- <div class="drop" onclick="$('pf${i}').click()">📷 この梱包の写真を追加</div><div class="photos">${p.photos.map(x=>photoHTML(x)).join('')}</div>
+ <div class="drop" onclick="$('pf${i}').click()">📷 この梱包の写真を追加</div><div class="photos">${}p.photos.map((x,j)=>'<div class="photoWrap">'+photoHTML(x)+'<button type="button" onclick="deletePackagePhoto('+i+','+j+')">🗑️ 削除</button></div>').join('')</div>
  </div></div>`).join(''):'<div class="card empty">「＋ 梱包を追加」から梱包を登録してください。</div>';
  packages.forEach((p,i)=>{let el=$('pf'+i);if(el)el.onchange=e=>filesToImages(e.target.files,a=>{p.photos.push(...a);renderPackages();})});
  bindPhotos();
 }
 function removePkg(i){packages.splice(i,1);packages.forEach((p,j)=>p.no=String(j+1).padStart(3,'0'));renderPackages();renderSummary()}
+
+function deletePackagePhoto(i,j){
+packages[i].photos.splice(j,1);
+renderPackages();
+renderSummary();
+}
 function renderSummary(){
  let q=0,n=0,g=0;packages.forEach(p=>{q+=+p.qty||0;n+=+p.net||0;g+=+p.gross||0});
  $('sPkg').textContent=packages.length+' 件';$('sQty').textContent=q+' pcs';$('sNet').textContent=n.toFixed(2)+' kg';$('sGross').textContent=g.toFixed(2)+' kg';
