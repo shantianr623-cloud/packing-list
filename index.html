@@ -93,7 +93,9 @@ $('historySearch').addEventListener('input',renderHistory);
 $('addBtn').addEventListener('click',()=>{packages.push({no:String(packages.length+1).padStart(3,'0'),sku:'',qty:0,type:'カートン',net:0,gross:0,note:'',photos:[]});renderPackages();});
 $('baseAdd').addEventListener('click',()=> $('baseFile').click());
 $('baseFile').addEventListener('change',e=>filesToImages(e.target.files,arr=>{basePhotos.push(...arr);renderBasePhotos()}));
-
+function photoHTML(src){
+    return `<img class="photo" src="${src}" data-src="${src}" onclick="openViewer(this.dataset.src || this.src)">`
+}
 function filesToImages(files,cb){let out=[],n=files.length;if(!n)return;[...files].forEach(f=>{let r=new FileReader();r.onload=()=>{out.push(r.result);if(--n===0)cb(out)};r.readAsDataURL(f)})}
 function renderBasePhotos(){$('basePhotos').innerHTML=basePhotos.map(x=>photoHTML(x)).join('')}
 function renderBasePhotos(){
@@ -110,9 +112,7 @@ function deleteBasePhoto(i){
   renderBasePhotos();
 }
 
-function photoHTML(src){
-  return `<img class="photo" src="${src}" data-src="${src}">`
-}
+
 function bindPhotos(root=document){root.querySelectorAll('.photo').forEach(im=>im.onclick=()=>openViewer(im.dataset.src||im.src))}
 function renderPackages(){
  $('count').textContent=packages.length+'件';
