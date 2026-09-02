@@ -102,16 +102,14 @@ function photoHTML(src){
     return `<img class="photo" src="${src}" data-src="${src}" onclick="openViewer(this.dataset.src || this.src)">`
 }
 function filesToImages(files,cb){let out=[],n=files.length;if(!n)return;[...files].forEach(f=>{let r=new FileReader();r.onload=()=>{out.push(r.result);if(--n===0)cb(out)};r.readAsDataURL(f)})}
-function renderBasePhotos(){$('#basePhotos').innerHTML=basePhotos.map(x=>photoHTML(x)).join('')}
 function renderBasePhotos(){
-  $('basePhotos').innerHTML=basePhotos.map((x,i)=>`
+  $('#basePhotos').innerHTML=basePhotos.map((x,i)=>`
     <div class="photoWrap">
       ${photoHTML(x)}
       <button type="button" onclick="deleteBasePhoto(${i})">🗑️ 削除</button>
     </div>
   `).join('')
 }
-
 function deleteBasePhoto(i){
   basePhotos.splice(i,1);
   renderBasePhotos();
