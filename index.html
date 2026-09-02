@@ -29,8 +29,12 @@ input,select,textarea{width:100%;font-size:15px;padding:11px;border:1px solid #c
 <label>品名</label><input id="name" placeholder="例：プラスチック部品">
 <label>パッキングリスト番号</label><input id="pl" placeholder="例：PL-2026-0001">
 <label>日付</label><input id="date" type="date">
-<label>基本写真</label><input id="baseFile" type="file" accept="image/*" multiple hidden>
-<label class="drop" id="baseAdd" for="baseFile">📷 写真を追加</label><div id="basePhotos" class="photos">/div>
+<label>基本写真</label>
+<input id="baseFile" type="file" accept="image/*" multiple hidden>
+
+<label class="drop" for="baseFile">📷 写真を追加</label>
+
+<div id="basePhotos" class="photos"></div>
 </div>
 <button class="btn primary" id="nextBtn">保存して梱包情報へ →</button>
 </section>
@@ -91,7 +95,6 @@ $('n3').addEventListener('click',()=>show('summary'));
 $('n4').addEventListener('click',()=>show('history'));
 $('historySearch').addEventListener('input',renderHistory);
 $('addBtn').addEventListener('click',()=>{packages.push({no:String(packages.length+1).padStart(3,'0'),sku:'',qty:0,type:'カートン',net:0,gross:0,note:'',photos:[]});renderPackages();});
-$('baseAdd').addEventListener('click',()=> $('baseFile').click());
 $('#baseFile').addEventListener('change',e=>filesToImages(e.target.files,arr=>{basePhotos.push(...arr);renderBasePhotos()}));
 function photoHTML(src){
     return `<img class="photo" src="${src}" data-src="${src}" onclick="openViewer(this.dataset.src || this.src)">`
